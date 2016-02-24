@@ -22,6 +22,12 @@
         border: 1px solid #0095dd;
         padding: .5em;
       }
+      .hidden {
+        display: none;
+      }
+      .expand {
+        background-color: rgba(110, 215, 23, 0.7);
+      }
     </style>
     <table>
       <tr>
@@ -30,29 +36,42 @@
         <th scope="col">Title</th>
       </tr>
       <template is="dom-repeat" items={{posts}}>
-        <tr>
+        <tr on-click="toggleContent" title="Click to toggle post display">
           <td>{{item.id}}</td>
           <td>{{item.userId}}</td>
           <td>{{item.title}}</td>
         </tr>
-        <tr>
-          <td colspan="3" class="content">{{item.body}}</td>
+        <tr class="content">
+          <td colspan="3">{{item.body}}</td>
         </tr>
       </template>
     </table>
   </template>
 </dom-module>
 <script>
-  //Defining the component's behavior and properties
+  //Define the component's behavior and methods
   Polymer({
     is: "post-table",
-    properties:  {
-    },
     attached: function(){
       var component = this;
+      //Fetch post data from API
       $.get('http://jsonplaceholder.typicode.com/posts')
-                    .done(function success(response){ component.posts = response; })
-                    .fail(function fail(response){ console.log('Request failed: ', response); });
+        .done(function success(response){
+          //Provide data to DOM template 
+          component.posts = response;
+        })
+        .fail(function fail(response){ console.log('Request failed: ', response); });
+    },
+    toggleContent: function(){
+      //These Polymer accessor provides us with the originally clicked DOM element
+      if((Polymer.dom(event).path[1]).nextElementSibling.classList.contains('hidden')){
+        (Polymer.dom(event).path[1]).classList.remove('expand');
+        (Polymer.dom(event).path[1]).nextElementSibling.classList.remove('hidden');
+      } else {
+        (Polymer.dom(event).path[1]).nextElementSibling.classList.add('hidden');
+        //Add background color on hover to indicate hidden content
+        (Polymer.dom(event).path[1]).classList.add('expand');
+      }
     }
     
   });
